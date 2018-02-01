@@ -141,6 +141,7 @@ class JoinedSubclassPersister extends AbstractEntityInheritancePersister
         $rootPersister = $this->em->getUnitOfWork()->getEntityPersister($rootClass->name);
         $rootTableName = $rootClass->getTableName();
 
+
         // Execute all inserts. For each entity:
         // 1) Insert on root table
         // 2) Insert on sub tables
