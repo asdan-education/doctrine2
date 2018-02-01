@@ -868,7 +868,13 @@ class UnitOfWork implements PropertyChangedListener
                 throw ORMInvalidArgumentException::invalidAssociation($targetClass, $assoc, $entry);
             }
 
-            $state = $this->getEntityState($entry, self::STATE_NEW);
+            try {
+                $state = $this->getEntityState($entry, self::STATE_NEW);
+            }
+            catch(\Exception $e) {
+                $message = '. attribute: ' . $targetClass->getName() . ', value: ' . $entry;
+                throw new \Exception($e->getMessage() . $message, $e->getCode());
+            }
 
             if ( ! ($entry instanceof $assoc['targetEntity'])) {
                 throw ORMException::unexpectedAssociationValue($assoc['sourceEntity'], $assoc['fieldName'], get_class($entry), $assoc['targetEntity']);

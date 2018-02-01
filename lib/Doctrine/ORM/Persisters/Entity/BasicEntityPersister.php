@@ -266,10 +266,13 @@ class BasicEntityPersister implements EntityPersister
         $idGenerator    = $this->class->idGenerator;
         $isPostInsertId = $idGenerator->isPostInsertGenerator();
 
-        $stmt       = $this->conn->prepare($this->getInsertSQL());
+//        $stmt       = $this->conn->prepare($this->getInsertSQL());
         $tableName  = $this->class->getTableName();
 
         foreach ($this->queuedInserts as $entity) {
+            // RF - I've had to move the statement within the loop as without it the statment gets funky for a second
+            //      insert. There appears to be no way to specify a different persister, hence monkeying around here.
+            $stmt       = $this->conn->prepare($this->getInsertSQL());
             $insertData = $this->prepareInsertData($entity);
 
             if (isset($insertData[$tableName])) {

@@ -140,29 +140,32 @@ class JoinedSubclassPersister extends AbstractEntityInheritancePersister
         // Prepare statement for the root table
         $rootPersister = $this->em->getUnitOfWork()->getEntityPersister($rootClass->name);
         $rootTableName = $rootClass->getTableName();
-        $rootTableStmt = $this->conn->prepare($rootPersister->getInsertSQL());
-
-        // Prepare statements for sub tables.
-        $subTableStmts = [];
-
-        if ($rootClass !== $this->class) {
-            $subTableStmts[$this->class->getTableName()] = $this->conn->prepare($this->getInsertSQL());
-        }
-
-        foreach ($this->class->parentClasses as $parentClassName) {
-            $parentClass = $this->em->getClassMetadata($parentClassName);
-            $parentTableName = $parentClass->getTableName();
-
-            if ($parentClass !== $rootClass) {
-                $parentPersister = $this->em->getUnitOfWork()->getEntityPersister($parentClassName);
-                $subTableStmts[$parentTableName] = $this->conn->prepare($parentPersister->getInsertSQL());
-            }
-        }
 
         // Execute all inserts. For each entity:
         // 1) Insert on root table
         // 2) Insert on sub tables
         foreach ($this->queuedInserts as $entity) {
+            // RF - I've had to move the statement within the loop as without it the statment gets funky for a second
+            //      insert. There appears to be no way to specify a different persister, hence monkeying around here.
+            $rootTableStmt = $this->conn->prepare($rootPersister->getInsertSQL());
+
+            // Prepare statements for sub tables.
+            $subTableStmts = array();
+
+            if ($rootClass !== $this->class) {
+                $subTableStmts[$this->class->getTableName()] = $this->conn->prepare($this->getInsertSQL());
+            }
+
+            foreach ($this->class->parentClasses as $parentClassName) {
+                $parentClass = $this->em->getClassMetadata($parentClassName);
+                $parentTableName = $parentClass->getTableName();
+
+                if ($parentClass !== $rootClass) {
+                    $parentPersister = $this->em->getUnitOfWork()->getEntityPersister($parentClassName);
+                    $subTableStmts[$parentTableName] = $this->conn->prepare($parentPersister->getInsertSQL());
+                }
+            }
+
             $insertData = $this->prepareInsertData($entity);
 
             // Execute insert on root table
