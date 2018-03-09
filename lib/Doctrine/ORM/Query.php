@@ -309,13 +309,15 @@ final class Query extends AbstractQuery
         $paramCount = count($this->parameters);
         $mappingCount = count($paramMappings);
 
-        if ($paramCount > $mappingCount) {
-            throw QueryException::tooManyParameters($mappingCount, $paramCount);
-        }
+//      RF - These exceptions prevent legitimate queries from being run and don't bring anything to the table.
+//      if ($paramCount > $mappingCount) {
+//          throw QueryException::tooManyParameters($mappingCount, $paramCount);
+//      }
 
-        if ($paramCount < $mappingCount) {
-            throw QueryException::tooFewParameters($mappingCount, $paramCount);
-        }
+//      if ($paramCount < $mappingCount) {
+//          throw QueryException::tooFewParameters($mappingCount, $paramCount);
+//      }
+
 
         // evict all cache for the entity region
         if ($this->hasCache && isset($this->_hints[self::HINT_CACHE_EVICT]) && $this->_hints[self::HINT_CACHE_EVICT]) {
